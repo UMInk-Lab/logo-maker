@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logo Maker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <style>
+      :root {
+        --bg: #f4f8ff;
+        --panel: #ffffff;
+        --panel-border: #e2eaf7;
+        --text: #1d2a44;
+        --muted: #5f6d86;
+        --accent: #2f70ff;
+        --shadow: 0 12px 30px rgba(19, 45, 98, 0.08);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Roboto", sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #ffffff, var(--bg) 45%, #e6efff);
+      }
+
+      header {
+        padding: 32px 6vw 12px;
+      }
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(26px, 3vw, 36px);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      .subtitle {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) 1fr;
+        gap: 28px;
+        padding: 0 6vw 48px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+      }
+
+      .section-title {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 18px 0 10px;
+        color: var(--muted);
+      }
+
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        font-size: 16px;
+      }
+
+      input[type="number"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid var(--panel-border);
+        background: #f8fbff;
+        font-size: 15px;
+        color: var(--text);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input[type="number"]:focus {
+        outline: none;
+        border-color: rgba(47, 112, 255, 0.45);
+        box-shadow: 0 0 0 3px rgba(47, 112, 255, 0.15);
+      }
+
+      input[type="range"] {
+        width: 100%;
+      }
+
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .row.spread {
+        justify-content: space-between;
+      }
+
+      .stepper {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #f5f9ff;
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        padding: 6px 10px;
+      }
+
+      .stepper-value {
+        min-width: 42px;
+        text-align: center;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .stepper-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 10px;
+        border: 1px solid var(--panel-border);
+        background: #ffffff;
+        color: var(--accent);
+        font-size: 18px;
+        line-height: 1;
+        cursor: pointer;
+      }
+
+      .stepper-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .icon-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        border: 1px solid var(--panel-border);
+        background: #f0f6ff;
+        color: var(--accent);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .icon-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(30, 70, 130, 0.12);
+      }
+
+      .icon-btn:active {
+        transform: translateY(0);
+      }
+
+      .icon-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        box-shadow: none;
+        transform: none;
+      }
+
+      .range-label {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .switch-track {
+        position: absolute;
+        inset: 0;
+        background: #dbe6fb;
+        border-radius: 999px;
+        transition: background 0.2s ease;
+      }
+
+      .switch-track::after {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+        transition: transform 0.2s ease;
+      }
+
+      .switch input:checked + .switch-track {
+        background: #2f70ff;
+      }
+
+      .switch input:checked + .switch-track::after {
+        transform: translateX(20px);
+      }
+
+      .color-picker {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        border: 1px solid var(--panel-border);
+        background: #ffffff;
+        padding: 0;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        overflow: hidden;
+      }
+
+      .color-picker.compact {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+      }
+
+      .color-picker:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .color-picker::-webkit-color-swatch-wrapper {
+        padding: 0;
+      }
+
+      .color-picker::-webkit-color-swatch {
+        border: none;
+        border-radius: 999px;
+      }
+
+      .color-picker::-moz-color-swatch {
+        border: none;
+        border-radius: 999px;
+      }
+
+      .color-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .color-card {
+        padding: 10px;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        background: #f8fbff;
+        display: grid;
+        gap: 6px;
+        justify-items: center;
+      }
+
+      .color-letter {
+        font-weight: 700;
+        font-size: 18px;
+      }
+
+      .color-input {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        border: 1px solid var(--panel-border);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+
+      .color-presets {
+        display: flex;
+        gap: 6px;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .preset-btn {
+        width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        border: 1px solid rgba(29, 42, 68, 0.2);
+        cursor: pointer;
+        padding: 0;
+        background: #ffffff;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+      }
+
+      .preset-btn[data-color="#FFFFFF"] {
+        border-color: rgba(29, 42, 68, 0.35);
+      }
+
+      .preview-wrap {
+        display: flex;
+        min-height: 360px;
+      }
+
+      .preview-area {
+        border-radius: var(--radius);
+        border: 1px solid var(--panel-border);
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        min-height: 200px;
+        background-image: linear-gradient(45deg, #e6eefc 25%, transparent 25%),
+          linear-gradient(-45deg, #e6eefc 25%, transparent 25%),
+          linear-gradient(45deg, transparent 75%, #e6eefc 75%),
+          linear-gradient(-45deg, transparent 75%, #e6eefc 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex: 1;
+      }
+
+      .preview-area.is-pannable {
+        cursor: grab;
+        user-select: none;
+      }
+
+      .preview-area.is-pannable:active {
+        cursor: grabbing;
+      }
+
+      .preview-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .canvas-controls {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 4;
+      }
+
+      .canvas-label {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 3;
+        font-size: 12px;
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--panel-border);
+        border-radius: 999px;
+        padding: 4px 10px;
+        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      }
+
+      .border-box {
+        position: absolute;
+        border: 2px dashed #7a8bb3;
+        z-index: 2;
+        pointer-events: none;
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.08);
+      }
+
+      .logo-preview span.space {
+        width: 12px;
+      }
+
+      .export-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .footer {
+        margin-top: 0;
+        padding: 18px 6vw 28px;
+        color: var(--muted);
+      }
+
+      .container.footer-inner {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .footer-links a {
+        color: var(--muted);
+        text-decoration: none;
+        margin: 0 6px;
+      }
+
+      .footer-links span {
+        color: #9fb0cf;
+      }
+
+      @media (max-width: 900px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>UMInk Logo 生成器</h1>
+    </header>
+
+    <main>
+      <section class="panel">
+        <div>
+          <label for="logoTextInput">Logo 文案</label>
+          <input id="logoTextInput" type="text" value="UMInk" />
+        </div>
+        <div class="row spread" style="margin-top: 10px;">
+          <label>字体粗细</label>
+          <div class="stepper" aria-label="字体粗细">
+            <button class="stepper-btn" id="fontWeightMinus" type="button" aria-label="降低字体粗细">
+              −
+            </button>
+            <span class="stepper-value" id="fontWeightValue">450</span>
+            <button class="stepper-btn" id="fontWeightPlus" type="button" aria-label="提高字体粗细">
+              +
+            </button>
+          </div>
+        </div>
+
+        <div class="section-title">Logo 尺寸</div>
+        <div class="row spread">
+          <label for="exportWidth">宽 × 高</label>
+        </div>
+        <div class="row">
+          <input id="exportWidth" type="number" min="64" max="2000" value="640" />
+          <button class="icon-btn" id="lockAspect" type="button" aria-pressed="true" title="锁定长宽">
+            <span class="iconify" data-icon="mdi:link-variant"></span>
+          </button>
+          <input id="exportHeight" type="number" min="64" max="2000" value="360" />
+        </div>
+
+        <div class="section-title">边框</div>
+        <div class="row">
+          <input id="borderRange" type="range" min="0" max="200" value="32" />
+          <span id="borderValue">32px</span>
+        </div>
+
+        <div class="section-title">背景</div>
+        <div class="row">
+          <label class="switch" title="透明背景">
+            <input id="bgTransparent" type="checkbox" checked />
+            <span class="switch-track"></span>
+          </label>
+          <label for="bgTransparent">透明背景</label>
+          <input id="bgColor" class="color-picker compact" type="color" value="#ffffff" />
+          <button class="icon-btn" id="bgEyeDropper" aria-label="取色器" title="取色器">
+            <span class="iconify" data-icon="mdi:eyedropper-variant"></span>
+          </button>
+        </div>
+
+        <div class="section-title">文字颜色</div>
+        <div class="color-grid" id="colorGrid"></div>
+
+        <div class="section-title">导出</div>
+        <div class="export-bar">
+          <button class="icon-btn" id="exportPng" aria-label="导出 PNG" title="导出 PNG">
+            <span class="iconify" data-icon="mdi:file-image-outline"></span>
+          </button>
+          <button class="icon-btn" id="exportJpg" aria-label="导出 JPG" title="导出 JPG">
+            <span class="iconify" data-icon="mdi:file-jpg-box"></span>
+          </button>
+          <button class="icon-btn" id="exportIco" aria-label="导出 ICON" title="导出 ICON">
+            <span class="iconify" data-icon="mdi:alpha-i-box"></span>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel preview-wrap">
+        <div class="preview-area" id="previewArea">
+          <div class="canvas-controls">
+            <button
+              class="icon-btn"
+              id="viewToggle"
+              type="button"
+              aria-label="切换预览大小"
+              title="查看实际尺寸"
+            >
+              <span class="iconify" data-icon="iconamoon:screen-full"></span>
+            </button>
+          </div>
+          <canvas class="preview-canvas" id="previewCanvas" width="640" height="360"></canvas>
+          <div class="border-box" id="borderBox" aria-hidden="true"></div>
+          <div class="canvas-label" id="canvasLabel">画布 640 × 360</div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <div class="footer-left">© 2026 UMInk Lab. 保留所有权利</div>
+        <div class="footer-links">
+          <a href="https://uminklab.com/zh/about">关于</a><span>·</span
+          ><a href="https://uminklab.com/zh/contact">联系我们</a>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const logoTextInput = document.getElementById("logoTextInput");
+      const fontWeightMinus = document.getElementById("fontWeightMinus");
+      const fontWeightPlus = document.getElementById("fontWeightPlus");
+      const fontWeightValue = document.getElementById("fontWeightValue");
+      const borderRange = document.getElementById("borderRange");
+      const borderValue = document.getElementById("borderValue");
+      const bgTransparent = document.getElementById("bgTransparent");
+      const bgColor = document.getElementById("bgColor");
+      const bgEyeDropper = document.getElementById("bgEyeDropper");
+      const colorGrid = document.getElementById("colorGrid");
+      const previewCanvas = document.getElementById("previewCanvas");
+      const previewArea = document.getElementById("previewArea");
+      const borderBox = document.getElementById("borderBox");
+      const canvasLabel = document.getElementById("canvasLabel");
+      const viewToggle = document.getElementById("viewToggle");
+      const exportWidthInput = document.getElementById("exportWidth");
+      const exportHeightInput = document.getElementById("exportHeight");
+      const lockAspect = document.getElementById("lockAspect");
+      const exportPng = document.getElementById("exportPng");
+      const exportJpg = document.getElementById("exportJpg");
+      const exportIco = document.getElementById("exportIco");
+
+      const baseFontSize = 88;
+      const defaultExportWidth = 640;
+      const defaultExportHeight = 360;
+      const fontFamily =
+        '"Google Sans", "Product Sans", "Segoe UI", "Arial", sans-serif';
+      const defaultColor = "#111827";
+      const primaryColor = "#2563EB";
+      const presetColors = ["#2563EB", "#111827", "#FFFFFF"];
+      const fontWeightMin = 300;
+      const fontWeightMax = 800;
+      const fontWeightStep = 50;
+      let colors = [];
+      let aspectLocked = true;
+      let aspectRatio = defaultExportWidth / defaultExportHeight;
+      let viewMode = "fit";
+      let panX = 0;
+      let panY = 0;
+      let fontWeight = 450;
+
+      const previewCtx = previewCanvas.getContext("2d");
+
+      function defaultColorForIndex(index) {
+        return index === 0 ? primaryColor : defaultColor;
+      }
+
+      function buildColors(text) {
+        const nextColors = Array.from(text).map((char, i) => {
+          if (char === " ") {
+            return null;
+          }
+          return colors[i] || defaultColorForIndex(i);
+        });
+        colors = nextColors;
+      }
+
+      function clampNumber(value, min, max, fallback) {
+        const number = Number(value);
+        if (Number.isNaN(number)) {
+          return fallback;
+        }
+        return Math.min(Math.max(number, min), max);
+      }
+
+      function normalizeHex(value) {
+        if (!value) {
+          return null;
+        }
+        const trimmed = value.trim().toUpperCase();
+        const hex3 = /^#?[0-9A-F]{3}$/;
+        const hex6 = /^#?[0-9A-F]{6}$/;
+        if (hex3.test(trimmed)) {
+          const raw = trimmed.replace("#", "");
+          return `#${raw[0]}${raw[0]}${raw[1]}${raw[1]}${raw[2]}${raw[2]}`;
+        }
+        if (hex6.test(trimmed)) {
+          return trimmed.startsWith("#") ? trimmed : `#${trimmed}`;
+        }
+        return null;
+      }
+
+      function getViewMetrics() {
+        const exportWidth = Number(exportWidthInput.value);
+        const exportHeight = Number(exportHeightInput.value);
+        const canvasWidth = previewCanvas.width;
+        const canvasHeight = previewCanvas.height;
+        const fitScale = Math.min(canvasWidth / exportWidth, canvasHeight / exportHeight);
+        const zoom = viewMode === "fit" ? fitScale : 1;
+        const contentWidth = exportWidth * zoom;
+        const contentHeight = exportHeight * zoom;
+        let originX = (canvasWidth - contentWidth) / 2 + panX;
+        let originY = (canvasHeight - contentHeight) / 2 + panY;
+
+        if (contentWidth > canvasWidth) {
+          const minX = canvasWidth - contentWidth;
+          const maxX = 0;
+          originX = Math.min(Math.max(originX, minX), maxX);
+          panX = originX - (canvasWidth - contentWidth) / 2;
+        } else {
+          panX = 0;
+          originX = (canvasWidth - contentWidth) / 2;
+        }
+
+        if (contentHeight > canvasHeight) {
+          const minY = canvasHeight - contentHeight;
+          const maxY = 0;
+          originY = Math.min(Math.max(originY, minY), maxY);
+          panY = originY - (canvasHeight - contentHeight) / 2;
+        } else {
+          panY = 0;
+          originY = (canvasHeight - contentHeight) / 2;
+        }
+
+        const canPan = contentWidth > canvasWidth || contentHeight > canvasHeight;
+        return { zoom, originX, originY, contentWidth, contentHeight, exportWidth, exportHeight, canPan };
+      }
+
+      function updateCanvasLabel() {
+        const { exportWidth, exportHeight, zoom } = getViewMetrics();
+        const zoomPercent = Math.round(zoom * 100);
+        canvasLabel.textContent = `画布 ${exportWidth} × ${exportHeight} · ${zoomPercent}%`;
+      }
+
+      function updateBorderBox() {
+        const { originX, originY, contentWidth, contentHeight } = getViewMetrics();
+        borderBox.style.width = `${contentWidth}px`;
+        borderBox.style.height = `${contentHeight}px`;
+        borderBox.style.left = `${originX}px`;
+        borderBox.style.top = `${originY}px`;
+      }
+
+      function drawLogo(ctx, destX, destY, destWidth, destHeight, { format = "png" } = {}) {
+        const text = logoTextInput.value || "";
+        const fontSize = baseFontSize;
+        const border = Number(borderRange.value);
+        const innerWidth = Math.max(1, destWidth - border * 2);
+        const innerHeight = Math.max(1, destHeight - border * 2);
+
+        ctx.save();
+        ctx.translate(destX, destY);
+
+        if (!bgTransparent.checked || format === "jpg") {
+          ctx.fillStyle = bgTransparent.checked ? "#ffffff" : bgColor.value;
+          ctx.fillRect(0, 0, destWidth, destHeight);
+        } else {
+          ctx.clearRect(0, 0, destWidth, destHeight);
+        }
+
+        if (!text) {
+          ctx.restore();
+          return;
+        }
+
+        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        const metrics = ctx.measureText(text);
+        const ascent = metrics.actualBoundingBoxAscent || fontSize * 0.8;
+        const descent = metrics.actualBoundingBoxDescent || fontSize * 0.2;
+        const rawWidth = Math.max(1, metrics.width);
+        const rawHeight = Math.max(1, ascent + descent);
+        const scale = Math.min(innerWidth / rawWidth, innerHeight / rawHeight);
+        const drawFontSize = fontSize * scale;
+        const scaledWidth = rawWidth * scale;
+        const scaledAscent = ascent * scale;
+        const startX = (destWidth - scaledWidth) / 2;
+        const baselineY = (destHeight - rawHeight * scale) / 2 + scaledAscent;
+
+        ctx.font = `${fontWeight} ${drawFontSize}px ${fontFamily}`;
+        let cursorX = startX;
+        Array.from(text).forEach((char, index) => {
+          if (char === " ") {
+            cursorX += ctx.measureText(" ").width;
+            return;
+          }
+          ctx.fillStyle = colors[index] || defaultColorForIndex(index);
+          ctx.fillText(char, cursorX, baselineY);
+          cursorX += ctx.measureText(char).width;
+        });
+
+        ctx.restore();
+      }
+
+      function updatePreview() {
+        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        const { originX, originY, contentWidth, contentHeight, canPan } = getViewMetrics();
+        drawLogo(previewCtx, originX, originY, contentWidth, contentHeight);
+        updateBorderBox();
+        updateCanvasLabel();
+        previewArea.classList.toggle("is-pannable", canPan);
+      }
+
+      function buildColorControls() {
+        colorGrid.innerHTML = "";
+        const text = logoTextInput.value || "";
+        Array.from(text).forEach((char, index) => {
+          if (char === " ") {
+            return;
+          }
+          const card = document.createElement("div");
+          card.className = "color-card";
+
+          const letter = document.createElement("div");
+          letter.className = "color-letter";
+          letter.textContent = char;
+
+          const picker = document.createElement("input");
+          picker.className = "color-picker";
+          picker.type = "color";
+          picker.value = colors[index];
+          picker.addEventListener("input", (event) => {
+            colors[index] = event.target.value;
+            hexInput.value = event.target.value.toUpperCase();
+            updatePreview();
+          });
+
+          const hexInput = document.createElement("input");
+          hexInput.type = "text";
+          hexInput.className = "color-input";
+          hexInput.value = (colors[index] || defaultColorForIndex(index)).toUpperCase();
+          hexInput.placeholder = "#RRGGBB";
+          hexInput.addEventListener("input", (event) => {
+            const nextValue = normalizeHex(event.target.value);
+            if (!nextValue) {
+              return;
+            }
+            colors[index] = nextValue;
+            picker.value = nextValue;
+            event.target.value = nextValue.toUpperCase();
+            updatePreview();
+          });
+
+          const presets = document.createElement("div");
+          presets.className = "color-presets";
+          presetColors.forEach((color) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "preset-btn";
+            btn.setAttribute("aria-label", `快捷颜色 ${color}`);
+            btn.dataset.color = color;
+            btn.style.background = color;
+            btn.addEventListener("click", () => {
+              colors[index] = color;
+              picker.value = color;
+              hexInput.value = color.toUpperCase();
+              updatePreview();
+            });
+            presets.appendChild(btn);
+          });
+
+          const eye = document.createElement("button");
+          eye.className = "icon-btn";
+          eye.type = "button";
+          eye.setAttribute("aria-label", "取色器");
+          eye.title = "取色器";
+          eye.innerHTML = '<span class="iconify" data-icon="mdi:eyedropper-variant"></span>';
+          eye.addEventListener("click", async () => {
+            if (!("EyeDropper" in window)) {
+              alert("当前浏览器不支持取色器。");
+              return;
+            }
+            const dropper = new EyeDropper();
+            const result = await dropper.open();
+            colors[index] = result.sRGBHex;
+            picker.value = result.sRGBHex;
+            hexInput.value = result.sRGBHex.toUpperCase();
+            updatePreview();
+          });
+
+          card.append(letter, picker, hexInput, presets, eye);
+          colorGrid.appendChild(card);
+        });
+      }
+
+      function rebuild() {
+        borderValue.textContent = `${borderRange.value}px`;
+        fontWeightValue.textContent = fontWeight;
+        fontWeightMinus.disabled = fontWeight <= fontWeightMin;
+        fontWeightPlus.disabled = fontWeight >= fontWeightMax;
+        buildColors(logoTextInput.value || "");
+        buildColorControls();
+        updatePreview();
+      }
+
+      function renderCanvas({ targetWidth, targetHeight, format = "png" } = {}) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        drawLogo(ctx, 0, 0, targetWidth, targetHeight, { format });
+        return canvas;
+      }
+
+      function downloadBlob(blob, filename) {
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      async function exportImage(type) {
+        const targetWidth = Number(exportWidthInput.value);
+        const targetHeight = Number(exportHeightInput.value);
+        const canvas = renderCanvas({ targetWidth, targetHeight, format: type });
+        const mime = type === "jpg" ? "image/jpeg" : `image/${type}`;
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, mime));
+        downloadBlob(blob, `logo.${type}`);
+      }
+
+      async function exportIcoFile() {
+        const canvas = renderCanvas({ targetWidth: 256, targetHeight: 256, format: "png" });
+        const pngBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+        const pngBuffer = await pngBlob.arrayBuffer();
+        const pngBytes = new Uint8Array(pngBuffer);
+        const icoBytes = new Uint8Array(22 + pngBytes.length);
+        const view = new DataView(icoBytes.buffer);
+
+        view.setUint16(0, 0, true);
+        view.setUint16(2, 1, true);
+        view.setUint16(4, 1, true);
+        view.setUint8(6, 0);
+        view.setUint8(7, 0);
+        view.setUint8(8, 0);
+        view.setUint8(9, 0);
+        view.setUint16(10, 1, true);
+        view.setUint16(12, 32, true);
+        view.setUint32(14, pngBytes.length, true);
+        view.setUint32(18, 22, true);
+        icoBytes.set(pngBytes, 22);
+
+        const icoBlob = new Blob([icoBytes], { type: "image/x-icon" });
+        downloadBlob(icoBlob, "logo.ico");
+      }
+
+      function resizePreviewCanvas() {
+        const rect = previewArea.getBoundingClientRect();
+        const width = Math.max(1, Math.round(rect.width));
+        const height = Math.max(1, Math.round(rect.height));
+        if (previewCanvas.width !== width || previewCanvas.height !== height) {
+          previewCanvas.width = width;
+          previewCanvas.height = height;
+          updatePreview();
+        }
+      }
+
+      logoTextInput.addEventListener("input", rebuild);
+      fontWeightMinus.addEventListener("click", () => {
+        fontWeight = Math.max(fontWeightMin, fontWeight - fontWeightStep);
+        rebuild();
+      });
+      fontWeightPlus.addEventListener("click", () => {
+        fontWeight = Math.min(fontWeightMax, fontWeight + fontWeightStep);
+        rebuild();
+      });
+      borderRange.addEventListener("input", () => {
+        borderValue.textContent = `${borderRange.value}px`;
+        updatePreview();
+      });
+      bgTransparent.addEventListener("change", () => {
+        updateBackgroundControls();
+        updatePreview();
+      });
+      bgColor.addEventListener("input", updatePreview);
+
+      bgEyeDropper.addEventListener("click", async () => {
+        if (!("EyeDropper" in window)) {
+          alert("当前浏览器不支持取色器。");
+          return;
+        }
+        const dropper = new EyeDropper();
+        const result = await dropper.open();
+        bgColor.value = result.sRGBHex;
+        bgTransparent.checked = false;
+        updateBackgroundControls();
+        updatePreview();
+      });
+
+      function syncExportSize({ source } = {}) {
+        const minSize = 64;
+        const maxSize = 2000;
+        let width = clampNumber(exportWidthInput.value, minSize, maxSize, defaultExportWidth);
+        let height = clampNumber(exportHeightInput.value, minSize, maxSize, defaultExportHeight);
+
+        if (aspectLocked) {
+          if (source === "width") {
+            height = Math.round(width / aspectRatio);
+          } else if (source === "height") {
+            width = Math.round(height * aspectRatio);
+          } else {
+            width = Math.round(width);
+            height = Math.round(width / aspectRatio);
+          }
+        } else {
+          aspectRatio = width / height;
+        }
+
+        exportWidthInput.value = width;
+        exportHeightInput.value = height;
+        updatePreview();
+      }
+
+      exportWidthInput.addEventListener("input", () => syncExportSize({ source: "width" }));
+      exportHeightInput.addEventListener("input", () => syncExportSize({ source: "height" }));
+      lockAspect.addEventListener("click", () => {
+        aspectLocked = !aspectLocked;
+        lockAspect.setAttribute("aria-pressed", String(aspectLocked));
+        lockAspect.innerHTML = aspectLocked
+          ? '<span class="iconify" data-icon="mdi:link-variant"></span>'
+          : '<span class="iconify" data-icon="mdi:link-variant-off"></span>';
+        if (aspectLocked) {
+          aspectRatio = Number(exportWidthInput.value) / Number(exportHeightInput.value);
+        }
+      });
+
+      viewToggle.addEventListener("click", () => {
+        viewMode = viewMode === "fit" ? "actual" : "fit";
+        panX = 0;
+        panY = 0;
+        viewToggle.setAttribute("aria-pressed", String(viewMode === "actual"));
+        viewToggle.setAttribute(
+          "title",
+          viewMode === "fit" ? "查看实际尺寸" : "适应屏幕"
+        );
+        updatePreview();
+      });
+
+      let isDragging = false;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let panStartX = 0;
+      let panStartY = 0;
+
+      previewArea.addEventListener("pointerdown", (event) => {
+        const { canPan } = getViewMetrics();
+        if (!canPan) {
+          return;
+        }
+        isDragging = true;
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        panStartX = panX;
+        panStartY = panY;
+        previewArea.setPointerCapture(event.pointerId);
+      });
+
+      previewArea.addEventListener("pointermove", (event) => {
+        if (!isDragging) {
+          return;
+        }
+        panX = panStartX + (event.clientX - dragStartX);
+        panY = panStartY + (event.clientY - dragStartY);
+        updatePreview();
+      });
+
+      function stopDrag(event) {
+        if (!isDragging) {
+          return;
+        }
+        isDragging = false;
+        if (event?.pointerId !== undefined) {
+          previewArea.releasePointerCapture(event.pointerId);
+        }
+      }
+
+      previewArea.addEventListener("pointerup", stopDrag);
+      previewArea.addEventListener("pointerleave", stopDrag);
+      previewArea.addEventListener("pointercancel", stopDrag);
+
+      function updateBackgroundControls() {
+        const isTransparent = bgTransparent.checked;
+        bgColor.disabled = isTransparent;
+        bgEyeDropper.disabled = isTransparent;
+      }
+
+      exportPng.addEventListener("click", () => exportImage("png"));
+      exportJpg.addEventListener("click", () => exportImage("jpg"));
+      exportIco.addEventListener("click", exportIcoFile);
+
+      const resizeObserver = new ResizeObserver(resizePreviewCanvas);
+      resizeObserver.observe(previewArea);
+      window.addEventListener("resize", resizePreviewCanvas);
+      resizePreviewCanvas();
+      syncExportSize();
+      updateBackgroundControls();
+      rebuild();
+
+      async function ensureFontsReady() {
+        if (!document.fonts || !document.fonts.load) {
+          return;
+        }
+        try {
+          await Promise.all([
+            document.fonts.load(`400 ${baseFontSize}px ${fontFamily}`),
+            document.fonts.load(`600 ${baseFontSize}px ${fontFamily}`),
+          ]);
+          await document.fonts.ready;
+          updatePreview();
+        } catch (error) {
+          // Font loading failed; keep current render.
+        }
+      }
+
+      ensureFontsReady();
+    </script>
+  </body>
+</html>
