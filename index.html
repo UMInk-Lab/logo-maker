@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Logo Maker</title>
+    <link rel="icon" href="https://uminklab.com/new-umink96.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
       rel="stylesheet"
@@ -104,6 +105,12 @@
         outline: none;
         border-color: rgba(47, 112, 255, 0.45);
         box-shadow: 0 0 0 3px rgba(47, 112, 255, 0.15);
+      }
+
+      input[type="number"]:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #eef4ff;
       }
 
       input[type="range"] {
@@ -463,6 +470,9 @@
             <span class="iconify" data-icon="mdi:link-variant"></span>
           </button>
           <input id="exportHeight" type="number" min="64" max="2000" value="360" />
+          <button class="icon-btn" id="sizeConfirm" type="button" aria-label="确认尺寸" title="确认尺寸">
+            <span class="iconify" data-icon="mdi:check"></span>
+          </button>
         </div>
 
         <div class="section-title">边框</div>
@@ -550,6 +560,7 @@
       const exportWidthInput = document.getElementById("exportWidth");
       const exportHeightInput = document.getElementById("exportHeight");
       const lockAspect = document.getElementById("lockAspect");
+      const sizeConfirm = document.getElementById("sizeConfirm");
       const exportPng = document.getElementById("exportPng");
       const exportJpg = document.getElementById("exportJpg");
       const exportIco = document.getElementById("exportIco");
@@ -574,6 +585,11 @@
       let fontWeight = 450;
       let lastValidWidth = defaultExportWidth;
       let lastValidHeight = defaultExportHeight;
+      let previewWidth = 0;
+      let previewHeight = 0;
+      let pendingWidth = String(defaultExportWidth);
+      let pendingHeight = String(defaultExportHeight);
+      let activeSizeField = "width";
 
       const previewCtx = previewCanvas.getContext("2d");
 
@@ -619,8 +635,8 @@
       function getViewMetrics() {
         const exportWidth = Number(exportWidthInput.value);
         const exportHeight = Number(exportHeightInput.value);
-        const canvasWidth = previewCanvas.width;
-        const canvasHeight = previewCanvas.height;
+        const canvasWidth = previewWidth;
+        const canvasHeight = previewHeight;
         const fitScale = Math.min(canvasWidth / exportWidth, canvasHeight / exportHeight);
         const zoom = viewMode === "fit" ? fitScale : 1;
         const contentWidth = exportWidth * zoom;
@@ -717,7 +733,7 @@
       }
 
       function updatePreview() {
-        previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        previewCtx.clearRect(0, 0, previewWidth, previewHeight);
         const { originX, originY, contentWidth, contentHeight, canPan } = getViewMetrics();
         drawLogo(previewCtx, originX, originY, contentWidth, contentHeight);
         updateBorderBox();
@@ -875,11 +891,17 @@
         const rect = previewArea.getBoundingClientRect();
         const width = Math.max(1, Math.round(rect.width));
         const height = Math.max(1, Math.round(rect.height));
-        if (previewCanvas.width !== width || previewCanvas.height !== height) {
-          previewCanvas.width = width;
-          previewCanvas.height = height;
-          updatePreview();
+        const dpr = window.devicePixelRatio || 1;
+        const targetWidth = Math.round(width * dpr);
+        const targetHeight = Math.round(height * dpr);
+        if (previewCanvas.width !== targetWidth || previewCanvas.height !== targetHeight) {
+          previewCanvas.width = targetWidth;
+          previewCanvas.height = targetHeight;
+          previewCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
+        previewWidth = width;
+        previewHeight = height;
+        updatePreview();
       }
 
       logoTextInput.addEventListener("input", rebuild);
@@ -976,14 +998,82 @@
         updatePreview();
       }
 
-      exportWidthInput.addEventListener("input", () => syncExportSize({ source: "width" }));
-      exportHeightInput.addEventListener("input", () => syncExportSize({ source: "height" }));
-      exportWidthInput.addEventListener("blur", () =>
-        syncExportSize({ source: "width", clamp: true })
-      );
-      exportHeightInput.addEventListener("blur", () =>
-        syncExportSize({ source: "height", clamp: true })
-      );
+      function getActiveSizeField() {
+        if (document.activeElement === exportHeightInput) {
+          return "height";
+        }
+        if (document.activeElement === exportWidthInput) {
+          return "width";
+        }
+        return activeSizeField;
+      }
+
+      function updateAspectLockUI() {
+        exportWidthInput.disabled = false;
+        exportHeightInput.disabled = false;
+        if (!aspectLocked) {
+          return;
+        }
+        const activeElement = document.activeElement;
+        if (activeElement === exportWidthInput) {
+          exportHeightInput.disabled = true;
+        } else if (activeElement === exportHeightInput) {
+          exportWidthInput.disabled = true;
+        }
+      }
+
+      function enableSizeInputs() {
+        exportWidthInput.disabled = false;
+        exportHeightInput.disabled = false;
+      }
+
+      function handleSizeFocus(field) {
+        activeSizeField = field;
+        updateAspectLockUI();
+      }
+
+      function handleSizeInput(field) {
+        activeSizeField = field;
+        if (field === "width") {
+          pendingWidth = exportWidthInput.value;
+        } else {
+          pendingHeight = exportHeightInput.value;
+        }
+        if (aspectLocked) {
+          const rawWidth = pendingWidth.trim();
+          const rawHeight = pendingHeight.trim();
+          const width = rawWidth === "" ? null : Number(rawWidth);
+          const height = rawHeight === "" ? null : Number(rawHeight);
+          if (field === "width" && width !== null && Number.isFinite(width)) {
+            const linked = Math.round(width / aspectRatio);
+            pendingHeight = String(linked);
+            exportHeightInput.value = pendingHeight;
+          }
+          if (field === "height" && height !== null && Number.isFinite(height)) {
+            const linked = Math.round(height * aspectRatio);
+            pendingWidth = String(linked);
+            exportWidthInput.value = pendingWidth;
+          }
+        }
+        updateAspectLockUI();
+      }
+
+      function applySizeUpdate() {
+        exportWidthInput.value = pendingWidth;
+        exportHeightInput.value = pendingHeight;
+        syncExportSize({ source: activeSizeField, clamp: true });
+        enableSizeInputs();
+        pendingWidth = exportWidthInput.value;
+        pendingHeight = exportHeightInput.value;
+      }
+
+      exportWidthInput.addEventListener("focus", () => handleSizeFocus("width"));
+      exportHeightInput.addEventListener("focus", () => handleSizeFocus("height"));
+      exportWidthInput.addEventListener("input", () => handleSizeInput("width"));
+      exportHeightInput.addEventListener("input", () => handleSizeInput("height"));
+      exportWidthInput.addEventListener("blur", updateAspectLockUI);
+      exportHeightInput.addEventListener("blur", updateAspectLockUI);
+      sizeConfirm.addEventListener("click", applySizeUpdate);
       lockAspect.addEventListener("click", () => {
         aspectLocked = !aspectLocked;
         lockAspect.setAttribute("aria-pressed", String(aspectLocked));
@@ -991,10 +1081,11 @@
           ? '<span class="iconify" data-icon="mdi:link-variant"></span>'
           : '<span class="iconify" data-icon="mdi:link-variant-off"></span>';
         if (aspectLocked) {
-          const width = Number(exportWidthInput.value) || lastValidWidth;
-          const height = Number(exportHeightInput.value) || lastValidHeight;
+          const width = Number(exportWidthInput.value || pendingWidth) || lastValidWidth;
+          const height = Number(exportHeightInput.value || pendingHeight) || lastValidHeight;
           aspectRatio = width / height;
         }
+        updateAspectLockUI();
       });
 
       viewToggle.addEventListener("click", () => {
@@ -1080,6 +1171,9 @@
       window.addEventListener("resize", resizePreviewCanvas);
       resizePreviewCanvas();
       syncExportSize({ clamp: true });
+      pendingWidth = exportWidthInput.value;
+      pendingHeight = exportHeightInput.value;
+      updateAspectLockUI();
       updateBackgroundControls();
       rebuild();
 
