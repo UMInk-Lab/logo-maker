@@ -270,7 +270,7 @@
 
       .color-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 10px;
       }
 
@@ -342,6 +342,7 @@
         overflow: hidden;
         display: flex;
         flex: 1;
+        touch-action: none;
       }
 
       .preview-area.is-pannable {
@@ -571,6 +572,8 @@
       let panX = 0;
       let panY = 0;
       let fontWeight = 450;
+      let lastValidWidth = defaultExportWidth;
+      let lastValidHeight = defaultExportHeight;
 
       const previewCtx = previewCanvas.getContext("2d");
 
@@ -911,32 +914,76 @@
         updatePreview();
       });
 
-      function syncExportSize({ source } = {}) {
+      function syncExportSize({ source, clamp = false } = {}) {
         const minSize = 64;
         const maxSize = 2000;
-        let width = clampNumber(exportWidthInput.value, minSize, maxSize, defaultExportWidth);
-        let height = clampNumber(exportHeightInput.value, minSize, maxSize, defaultExportHeight);
+        const rawWidth = exportWidthInput.value.trim();
+        const rawHeight = exportHeightInput.value.trim();
+        const width = rawWidth === "" ? null : Number(rawWidth);
+        const height = rawHeight === "" ? null : Number(rawHeight);
+        const widthValid = width !== null && Number.isFinite(width);
+        const heightValid = height !== null && Number.isFinite(height);
+
+        if ((rawWidth !== "" && !widthValid) || (rawHeight !== "" && !heightValid)) {
+          return;
+        }
+
+        if (!widthValid || !heightValid) {
+          if (clamp) {
+            if (!widthValid) {
+              exportWidthInput.value = lastValidWidth;
+            }
+            if (!heightValid) {
+              exportHeightInput.value = lastValidHeight;
+            }
+            syncExportSize({ source, clamp: true });
+          }
+          return;
+        }
+
+        let nextWidth = width;
+        let nextHeight = height;
 
         if (aspectLocked) {
           if (source === "width") {
-            height = Math.round(width / aspectRatio);
+            nextHeight = Math.round(nextWidth / aspectRatio);
           } else if (source === "height") {
-            width = Math.round(height * aspectRatio);
+            nextWidth = Math.round(nextHeight * aspectRatio);
           } else {
-            width = Math.round(width);
-            height = Math.round(width / aspectRatio);
+            nextWidth = Math.round(nextWidth);
+            nextHeight = Math.round(nextWidth / aspectRatio);
           }
         } else {
-          aspectRatio = width / height;
+          aspectRatio = nextWidth / nextHeight;
         }
 
-        exportWidthInput.value = width;
-        exportHeightInput.value = height;
+        if (clamp) {
+          nextWidth = clampNumber(nextWidth, minSize, maxSize, lastValidWidth);
+          nextHeight = clampNumber(nextHeight, minSize, maxSize, lastValidHeight);
+        }
+
+        nextWidth = Math.round(nextWidth);
+        nextHeight = Math.round(nextHeight);
+
+        if (source !== "height") {
+          exportWidthInput.value = nextWidth;
+        }
+        if (source !== "width") {
+          exportHeightInput.value = nextHeight;
+        }
+        lastValidWidth = nextWidth;
+        lastValidHeight = nextHeight;
         updatePreview();
       }
 
       exportWidthInput.addEventListener("input", () => syncExportSize({ source: "width" }));
       exportHeightInput.addEventListener("input", () => syncExportSize({ source: "height" }));
+      exportWidthInput.addEventListener("blur", () =>
+        syncExportSize({ source: "width", clamp: true })
+      );
+      exportHeightInput.addEventListener("blur", () =>
+        syncExportSize({ source: "height", clamp: true })
+      );
       lockAspect.addEventListener("click", () => {
         aspectLocked = !aspectLocked;
         lockAspect.setAttribute("aria-pressed", String(aspectLocked));
@@ -944,7 +991,9 @@
           ? '<span class="iconify" data-icon="mdi:link-variant"></span>'
           : '<span class="iconify" data-icon="mdi:link-variant-off"></span>';
         if (aspectLocked) {
-          aspectRatio = Number(exportWidthInput.value) / Number(exportHeightInput.value);
+          const width = Number(exportWidthInput.value) || lastValidWidth;
+          const height = Number(exportHeightInput.value) || lastValidHeight;
+          aspectRatio = width / height;
         }
       });
 
@@ -965,6 +1014,9 @@
       let dragStartY = 0;
       let panStartX = 0;
       let panStartY = 0;
+      let dragRafId = 0;
+      let pendingPanX = 0;
+      let pendingPanY = 0;
 
       previewArea.addEventListener("pointerdown", (event) => {
         const { canPan } = getViewMetrics();
@@ -983,9 +1035,17 @@
         if (!isDragging) {
           return;
         }
-        panX = panStartX + (event.clientX - dragStartX);
-        panY = panStartY + (event.clientY - dragStartY);
-        updatePreview();
+        pendingPanX = panStartX + (event.clientX - dragStartX);
+        pendingPanY = panStartY + (event.clientY - dragStartY);
+        if (dragRafId) {
+          return;
+        }
+        dragRafId = requestAnimationFrame(() => {
+          panX = pendingPanX;
+          panY = pendingPanY;
+          updatePreview();
+          dragRafId = 0;
+        });
       });
 
       function stopDrag(event) {
@@ -993,13 +1053,16 @@
           return;
         }
         isDragging = false;
+        if (dragRafId) {
+          cancelAnimationFrame(dragRafId);
+          dragRafId = 0;
+        }
         if (event?.pointerId !== undefined) {
           previewArea.releasePointerCapture(event.pointerId);
         }
       }
 
       previewArea.addEventListener("pointerup", stopDrag);
-      previewArea.addEventListener("pointerleave", stopDrag);
       previewArea.addEventListener("pointercancel", stopDrag);
 
       function updateBackgroundControls() {
@@ -1016,7 +1079,7 @@
       resizeObserver.observe(previewArea);
       window.addEventListener("resize", resizePreviewCanvas);
       resizePreviewCanvas();
-      syncExportSize();
+      syncExportSize({ clamp: true });
       updateBackgroundControls();
       rebuild();
 
