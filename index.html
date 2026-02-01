@@ -509,6 +509,22 @@
         color: #ffffff;
       }
 
+      .icon-btn.cancel {
+        background: #f1f4f9;
+        border-color: #d7e0ee;
+        color: #5f6d86;
+      }
+
+      .icon-btn.confirm {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+      }
+
+      .size-display {
+        font-variant-numeric: tabular-nums;
+      }
+
       .footer {
         margin-top: 0;
         padding: 18px 6vw 28px;
@@ -660,11 +676,15 @@
         <input id="webpQuality" type="range" min="10" max="100" value="80" />
         <div class="row spread">
           <span class="range-label">预计大小</span>
-          <strong id="webpSize">计算中...</strong>
+          <strong id="webpSize" class="size-display">--</strong>
         </div>
         <div class="modal-actions">
-          <button class="btn" id="webpCancel" type="button">取消</button>
-          <button class="btn primary" id="webpConfirm" type="button">确认导出</button>
+          <button class="icon-btn cancel" id="webpCancel" type="button" aria-label="取消">
+            <span class="iconify" data-icon="material-symbols:cancel-outline-rounded"></span>
+          </button>
+          <button class="icon-btn confirm" id="webpConfirm" type="button" aria-label="确认导出">
+            <span class="iconify" data-icon="icons8:right-round"></span>
+          </button>
         </div>
       </div>
     </div>
@@ -1065,9 +1085,14 @@
         return blob ? blob.size : null;
       }
 
+      function setWebpSizeDisplay(text) {
+        webpSize.textContent = text || "--";
+      }
+
       function openWebpModal() {
         webpModal.classList.add("show");
         webpModal.setAttribute("aria-hidden", "false");
+        updateWebpQualityLabel();
         updateWebpEstimate();
       }
 
@@ -1080,14 +1105,18 @@
       function updateWebpEstimate() {
         const quality = Number(webpQuality.value) / 100;
         webpQualityValue.textContent = `${Math.round(quality * 100)}%`;
-        webpSize.textContent = "计算中...";
         if (webpEstimateRaf) {
           cancelAnimationFrame(webpEstimateRaf);
         }
         webpEstimateRaf = requestAnimationFrame(async () => {
           const size = await estimateWebpSize(quality);
-          webpSize.textContent = size === null ? "--" : formatSize(size);
+          setWebpSizeDisplay(size === null ? "--" : formatSize(size));
         });
+      }
+
+      function updateWebpQualityLabel() {
+        const quality = Number(webpQuality.value);
+        webpQualityValue.textContent = `${Math.round(quality)}%`;
       }
 
       function resizePreviewCanvas() {
@@ -1505,7 +1534,8 @@
           : '<span>文字颜色</span><span class="iconify" data-icon="mdi:chevron-down"></span>';
       });
 
-      webpQuality.addEventListener("input", updateWebpEstimate);
+      webpQuality.addEventListener("input", updateWebpQualityLabel);
+      webpQuality.addEventListener("change", updateWebpEstimate);
       webpCancel.addEventListener("click", closeWebpModal);
       webpConfirm.addEventListener("click", async () => {
         const quality = Number(webpQuality.value) / 100;
