@@ -281,6 +281,31 @@
         gap: 10px;
       }
 
+      .section-toggle {
+        width: 100%;
+        border: none;
+        background: transparent;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 14px;
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+      }
+
+      .section-toggle span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .section-content.is-collapsed {
+        display: none;
+      }
+
       .color-card {
         padding: 10px;
         border: 1px solid var(--panel-border);
@@ -406,6 +431,84 @@
         flex-wrap: wrap;
       }
 
+      .toast {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        background: #ffffff;
+        border: 1px solid var(--panel-border);
+        border-radius: 14px;
+        padding: 12px 16px;
+        box-shadow: var(--shadow);
+        color: var(--text);
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(12px);
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        z-index: 10;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+        padding: 20px;
+      }
+
+      .modal-backdrop.show {
+        display: flex;
+      }
+
+      .modal {
+        width: min(420px, 92vw);
+        background: #ffffff;
+        border: 1px solid var(--panel-border);
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: var(--shadow);
+        display: grid;
+        gap: 14px;
+      }
+
+      .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        border-radius: 12px;
+        border: 1px solid var(--panel-border);
+        background: #ffffff;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #ffffff;
+      }
+
       .footer {
         margin-top: 0;
         padding: 18px 6vw 28px;
@@ -494,8 +597,13 @@
           </button>
         </div>
 
-        <div class="section-title">文字颜色</div>
-        <div class="color-grid" id="colorGrid"></div>
+        <button class="section-toggle" id="colorToggle" type="button" aria-expanded="true">
+          <span>文字颜色</span>
+          <span class="iconify" data-icon="mdi:chevron-up"></span>
+        </button>
+        <div class="section-content" id="colorSection">
+          <div class="color-grid" id="colorGrid"></div>
+        </div>
 
         <div class="section-title">导出</div>
         <div class="export-bar">
@@ -505,8 +613,14 @@
           <button class="icon-btn" id="exportJpg" aria-label="导出 JPG" title="导出 JPG">
             <span class="iconify" data-icon="mdi:file-jpg-box"></span>
           </button>
+          <button class="icon-btn" id="exportWebp" aria-label="导出 WEBP" title="导出 WEBP">
+            <span class="iconify" data-icon="mdi:file-image-plus-outline"></span>
+          </button>
           <button class="icon-btn" id="exportIco" aria-label="导出 ICON" title="导出 ICON">
             <span class="iconify" data-icon="mdi:alpha-i-box"></span>
+          </button>
+          <button class="icon-btn" id="shareLink" aria-label="分享链接" title="分享链接">
+            <span class="iconify" data-icon="mdi:share-variant-outline"></span>
           </button>
         </div>
       </section>
@@ -530,6 +644,30 @@
         </div>
       </section>
     </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+      <span>已复制分享链接</span>
+    </div>
+
+    <div class="modal-backdrop" id="webpModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="webpTitle">
+        <div class="modal-title" id="webpTitle">导出 WEBP</div>
+        <div class="row spread">
+          <label for="webpQuality">压缩质量</label>
+          <strong id="webpQualityValue">80%</strong>
+        </div>
+        <input id="webpQuality" type="range" min="10" max="100" value="80" />
+        <div class="row spread">
+          <span class="range-label">预计大小</span>
+          <strong id="webpSize">计算中...</strong>
+        </div>
+        <div class="modal-actions">
+          <button class="btn" id="webpCancel" type="button">取消</button>
+          <button class="btn primary" id="webpConfirm" type="button">确认导出</button>
+        </div>
+      </div>
+    </div>
 
     <footer class="footer">
       <div class="container footer-inner">
@@ -563,7 +701,18 @@
       const sizeConfirm = document.getElementById("sizeConfirm");
       const exportPng = document.getElementById("exportPng");
       const exportJpg = document.getElementById("exportJpg");
+      const exportWebp = document.getElementById("exportWebp");
       const exportIco = document.getElementById("exportIco");
+      const shareLink = document.getElementById("shareLink");
+      const toast = document.getElementById("toast");
+      const colorToggle = document.getElementById("colorToggle");
+      const colorSection = document.getElementById("colorSection");
+      const webpModal = document.getElementById("webpModal");
+      const webpQuality = document.getElementById("webpQuality");
+      const webpQualityValue = document.getElementById("webpQualityValue");
+      const webpSize = document.getElementById("webpSize");
+      const webpCancel = document.getElementById("webpCancel");
+      const webpConfirm = document.getElementById("webpConfirm");
 
       const baseFontSize = 88;
       const defaultExportWidth = 640;
@@ -590,6 +739,7 @@
       let pendingWidth = String(defaultExportWidth);
       let pendingHeight = String(defaultExportHeight);
       let activeSizeField = "width";
+      let toastTimer = 0;
 
       const previewCtx = previewCanvas.getContext("2d");
 
@@ -763,6 +913,7 @@
             colors[index] = event.target.value;
             hexInput.value = event.target.value.toUpperCase();
             updatePreview();
+            updateUrlFromState();
           });
 
           const hexInput = document.createElement("input");
@@ -779,6 +930,7 @@
             picker.value = nextValue;
             event.target.value = nextValue.toUpperCase();
             updatePreview();
+            updateUrlFromState();
           });
 
           const presets = document.createElement("div");
@@ -795,6 +947,7 @@
               picker.value = color;
               hexInput.value = color.toUpperCase();
               updatePreview();
+              updateUrlFromState();
             });
             presets.appendChild(btn);
           });
@@ -816,6 +969,7 @@
             picker.value = result.sRGBHex;
             hexInput.value = result.sRGBHex.toUpperCase();
             updatePreview();
+            updateUrlFromState();
           });
 
           card.append(letter, picker, hexInput, presets, eye);
@@ -831,6 +985,7 @@
         buildColors(logoTextInput.value || "");
         buildColorControls();
         updatePreview();
+        updateUrlFromState();
       }
 
       function renderCanvas({ targetWidth, targetHeight, format = "png" } = {}) {
@@ -887,6 +1042,54 @@
         downloadBlob(icoBlob, "logo.ico");
       }
 
+      function formatSize(bytes) {
+        if (!Number.isFinite(bytes)) {
+          return "--";
+        }
+        if (bytes < 1024) {
+          return `${bytes} B`;
+        }
+        if (bytes < 1024 * 1024) {
+          return `${(bytes / 1024).toFixed(1)} KB`;
+        }
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+      }
+
+      async function estimateWebpSize(quality) {
+        const targetWidth = Number(exportWidthInput.value);
+        const targetHeight = Number(exportHeightInput.value);
+        const canvas = renderCanvas({ targetWidth, targetHeight, format: "webp" });
+        const blob = await new Promise((resolve) =>
+          canvas.toBlob(resolve, "image/webp", quality)
+        );
+        return blob ? blob.size : null;
+      }
+
+      function openWebpModal() {
+        webpModal.classList.add("show");
+        webpModal.setAttribute("aria-hidden", "false");
+        updateWebpEstimate();
+      }
+
+      function closeWebpModal() {
+        webpModal.classList.remove("show");
+        webpModal.setAttribute("aria-hidden", "true");
+      }
+
+      let webpEstimateRaf = 0;
+      function updateWebpEstimate() {
+        const quality = Number(webpQuality.value) / 100;
+        webpQualityValue.textContent = `${Math.round(quality * 100)}%`;
+        webpSize.textContent = "计算中...";
+        if (webpEstimateRaf) {
+          cancelAnimationFrame(webpEstimateRaf);
+        }
+        webpEstimateRaf = requestAnimationFrame(async () => {
+          const size = await estimateWebpSize(quality);
+          webpSize.textContent = size === null ? "--" : formatSize(size);
+        });
+      }
+
       function resizePreviewCanvas() {
         const rect = previewArea.getBoundingClientRect();
         const width = Math.max(1, Math.round(rect.width));
@@ -916,12 +1119,17 @@
       borderRange.addEventListener("input", () => {
         borderValue.textContent = `${borderRange.value}px`;
         updatePreview();
+        updateUrlFromState();
       });
       bgTransparent.addEventListener("change", () => {
         updateBackgroundControls();
         updatePreview();
+        updateUrlFromState();
       });
-      bgColor.addEventListener("input", updatePreview);
+      bgColor.addEventListener("input", () => {
+        updatePreview();
+        updateUrlFromState();
+      });
 
       bgEyeDropper.addEventListener("click", async () => {
         if (!("EyeDropper" in window)) {
@@ -934,6 +1142,7 @@
         bgTransparent.checked = false;
         updateBackgroundControls();
         updatePreview();
+        updateUrlFromState();
       });
 
       function syncExportSize({ source, clamp = false } = {}) {
@@ -1065,6 +1274,7 @@
         enableSizeInputs();
         pendingWidth = exportWidthInput.value;
         pendingHeight = exportHeightInput.value;
+        updateUrlFromState();
       }
 
       exportWidthInput.addEventListener("focus", () => handleSizeFocus("width"));
@@ -1086,6 +1296,7 @@
           aspectRatio = width / height;
         }
         updateAspectLockUI();
+        updateUrlFromState();
       });
 
       viewToggle.addEventListener("click", () => {
@@ -1162,14 +1373,165 @@
         bgEyeDropper.disabled = isTransparent;
       }
 
+      function buildShareUrl() {
+        const params = new URLSearchParams();
+        params.set("text", logoTextInput.value || "");
+        params.set("weight", String(fontWeight));
+        params.set("border", String(borderRange.value));
+        params.set("bgT", bgTransparent.checked ? "1" : "0");
+        params.set("bg", bgColor.value.replace("#", ""));
+        params.set("w", String(exportWidthInput.value));
+        params.set("h", String(exportHeightInput.value));
+        params.set("lock", aspectLocked ? "1" : "0");
+        const colorParam = colors.map((color) => (color ? color.replace("#", "") : "")).join(",");
+        params.set("colors", colorParam);
+        const baseUrl = window.location.href.split("?")[0];
+        return `${baseUrl}?${params.toString()}`;
+      }
+
+      function updateUrlFromState() {
+        const url = buildShareUrl();
+        history.replaceState(null, "", url);
+      }
+
+      function showToast() {
+        toast.classList.add("show");
+        if (toastTimer) {
+          clearTimeout(toastTimer);
+        }
+        toastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 1600);
+      }
+
+      async function copyShareLink() {
+        const url = buildShareUrl();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(url);
+          } else {
+            const input = document.createElement("textarea");
+            input.value = url;
+            input.setAttribute("readonly", "true");
+            input.style.position = "fixed";
+            input.style.top = "-9999px";
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("copy");
+            input.remove();
+          }
+          showToast();
+        } catch (error) {
+          // Ignore clipboard errors silently.
+        }
+      }
+
+      function applyConfigFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        if (![...params.keys()].length) {
+          return;
+        }
+
+        const textParam = params.get("text");
+        if (textParam !== null) {
+          logoTextInput.value = textParam;
+        }
+
+        const weightParam = Number(params.get("weight"));
+        if (Number.isFinite(weightParam)) {
+          fontWeight = clampNumber(weightParam, fontWeightMin, fontWeightMax, fontWeight);
+        }
+
+        const borderParam = Number(params.get("border"));
+        if (Number.isFinite(borderParam)) {
+          borderRange.value = clampNumber(borderParam, 0, 200, Number(borderRange.value));
+        }
+
+        const bgTransparentParam = params.get("bgT");
+        if (bgTransparentParam !== null) {
+          bgTransparent.checked = bgTransparentParam === "1";
+        }
+
+        const bgParam = params.get("bg");
+        const normalizedBg = normalizeHex(bgParam ? `#${bgParam}` : bgColor.value);
+        if (normalizedBg) {
+          bgColor.value = normalizedBg;
+        }
+
+        const widthParam = Number(params.get("w"));
+        const heightParam = Number(params.get("h"));
+        if (Number.isFinite(widthParam)) {
+          exportWidthInput.value = clampNumber(widthParam, 64, 2000, defaultExportWidth);
+        }
+        if (Number.isFinite(heightParam)) {
+          exportHeightInput.value = clampNumber(heightParam, 64, 2000, defaultExportHeight);
+        }
+
+        const lockParam = params.get("lock");
+        if (lockParam !== null) {
+          aspectLocked = lockParam === "1";
+          lockAspect.setAttribute("aria-pressed", String(aspectLocked));
+          lockAspect.innerHTML = aspectLocked
+            ? '<span class="iconify" data-icon="mdi:link-variant"></span>'
+            : '<span class="iconify" data-icon="mdi:link-variant-off"></span>';
+        }
+
+        const colorParam = params.get("colors");
+        if (colorParam !== null) {
+          const list = colorParam.split(",");
+          colors = list.map((raw) => (raw ? normalizeHex(`#${raw}`) : null));
+        }
+
+        lastValidWidth = Number(exportWidthInput.value);
+        lastValidHeight = Number(exportHeightInput.value);
+        aspectRatio = lastValidWidth / lastValidHeight;
+        pendingWidth = exportWidthInput.value;
+        pendingHeight = exportHeightInput.value;
+      }
+
       exportPng.addEventListener("click", () => exportImage("png"));
       exportJpg.addEventListener("click", () => exportImage("jpg"));
+      exportWebp.addEventListener("click", openWebpModal);
       exportIco.addEventListener("click", exportIcoFile);
+      shareLink.addEventListener("click", copyShareLink);
+
+      colorToggle.addEventListener("click", () => {
+        const isExpanded = colorToggle.getAttribute("aria-expanded") === "true";
+        const nextExpanded = !isExpanded;
+        colorToggle.setAttribute("aria-expanded", String(nextExpanded));
+        colorSection.classList.toggle("is-collapsed", !nextExpanded);
+        colorToggle.innerHTML = nextExpanded
+          ? '<span>文字颜色</span><span class="iconify" data-icon="mdi:chevron-up"></span>'
+          : '<span>文字颜色</span><span class="iconify" data-icon="mdi:chevron-down"></span>';
+      });
+
+      webpQuality.addEventListener("input", updateWebpEstimate);
+      webpCancel.addEventListener("click", closeWebpModal);
+      webpConfirm.addEventListener("click", async () => {
+        const quality = Number(webpQuality.value) / 100;
+        const targetWidth = Number(exportWidthInput.value);
+        const targetHeight = Number(exportHeightInput.value);
+        const canvas = renderCanvas({ targetWidth, targetHeight, format: "webp" });
+        const blob = await new Promise((resolve) =>
+          canvas.toBlob(resolve, "image/webp", quality)
+        );
+        if (blob) {
+          downloadBlob(blob, "logo.webp");
+        }
+        closeWebpModal();
+      });
+
+      webpModal.addEventListener("click", (event) => {
+        if (event.target === webpModal) {
+          closeWebpModal();
+        }
+      });
 
       const resizeObserver = new ResizeObserver(resizePreviewCanvas);
       resizeObserver.observe(previewArea);
       window.addEventListener("resize", resizePreviewCanvas);
       resizePreviewCanvas();
+      applyConfigFromUrl();
       syncExportSize({ clamp: true });
       pendingWidth = exportWidthInput.value;
       pendingHeight = exportHeightInput.value;
