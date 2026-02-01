@@ -76,6 +76,20 @@
         color: var(--muted);
       }
 
+      .panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+      }
+
+      .panel-title {
+        font-size: 14px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
       label {
         display: block;
         font-size: 14px;
@@ -521,6 +535,12 @@
         color: #ffffff;
       }
 
+      .icon-btn.reset {
+        background: #f1f4f9;
+        border-color: #d7e0ee;
+        color: #7b879c;
+      }
+
       .size-display {
         font-variant-numeric: tabular-nums;
       }
@@ -562,6 +582,12 @@
 
     <main>
       <section class="panel">
+        <div class="panel-header">
+          <span class="panel-title">参数</span>
+          <button class="icon-btn reset" id="resetParams" type="button" aria-label="重置参数" title="重置参数">
+            <span class="iconify" data-icon="ant-design:clear-outlined"></span>
+          </button>
+        </div>
         <div>
           <label for="logoTextInput">Logo 文案</label>
           <input id="logoTextInput" type="text" value="UMInk" />
@@ -689,6 +715,23 @@
       </div>
     </div>
 
+    <div class="modal-backdrop" id="resetModal" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="resetTitle">
+        <div class="modal-title" id="resetTitle">确认重置参数？</div>
+        <div style="color: var(--muted); font-size: 14px;">
+          将清空 URL 参数并恢复默认设置。
+        </div>
+        <div class="modal-actions">
+          <button class="icon-btn cancel" id="resetCancel" type="button" aria-label="取消重置">
+            <span class="iconify" data-icon="material-symbols:cancel-outline-rounded"></span>
+          </button>
+          <button class="icon-btn confirm" id="resetConfirm" type="button" aria-label="确认重置">
+            <span class="iconify" data-icon="mdi:check-circle-outline"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <footer class="footer">
       <div class="container footer-inner">
         <div class="footer-left">© 2026 UMInk Lab. 保留所有权利</div>
@@ -724,6 +767,7 @@
       const exportWebp = document.getElementById("exportWebp");
       const exportIco = document.getElementById("exportIco");
       const shareLink = document.getElementById("shareLink");
+      const resetParams = document.getElementById("resetParams");
       const toast = document.getElementById("toast");
       const colorToggle = document.getElementById("colorToggle");
       const colorSection = document.getElementById("colorSection");
@@ -733,6 +777,9 @@
       const webpSize = document.getElementById("webpSize");
       const webpCancel = document.getElementById("webpCancel");
       const webpConfirm = document.getElementById("webpConfirm");
+      const resetModal = document.getElementById("resetModal");
+      const resetCancel = document.getElementById("resetCancel");
+      const resetConfirm = document.getElementById("resetConfirm");
 
       const baseFontSize = 88;
       const defaultExportWidth = 640;
@@ -1099,6 +1146,16 @@
       function closeWebpModal() {
         webpModal.classList.remove("show");
         webpModal.setAttribute("aria-hidden", "true");
+      }
+
+      function openResetModal() {
+        resetModal.classList.add("show");
+        resetModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeResetModal() {
+        resetModal.classList.remove("show");
+        resetModal.setAttribute("aria-hidden", "true");
       }
 
       let webpEstimateRaf = 0;
@@ -1523,6 +1580,7 @@
       exportWebp.addEventListener("click", openWebpModal);
       exportIco.addEventListener("click", exportIcoFile);
       shareLink.addEventListener("click", copyShareLink);
+      resetParams.addEventListener("click", openResetModal);
 
       colorToggle.addEventListener("click", () => {
         const isExpanded = colorToggle.getAttribute("aria-expanded") === "true";
@@ -1554,6 +1612,18 @@
       webpModal.addEventListener("click", (event) => {
         if (event.target === webpModal) {
           closeWebpModal();
+        }
+      });
+
+      resetCancel.addEventListener("click", closeResetModal);
+      resetConfirm.addEventListener("click", () => {
+        const baseUrl = window.location.href.split("?")[0];
+        window.location.href = baseUrl;
+      });
+
+      resetModal.addEventListener("click", (event) => {
+        if (event.target === resetModal) {
+          closeResetModal();
         }
       });
 
